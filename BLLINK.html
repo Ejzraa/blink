@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackLine Hub</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --text-color: #e6e6e6;
+            --accent-color: #00ff8c;
+            --danger-color: #ff004c;
+            --card-bg: #121212;
+            --hover-color: #1a1a1a;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                rgba(0, 255, 140, 0.03),
+                rgba(0, 0, 0, 0.1)
+            );
+            pointer-events: none;
+        }
+        
+        .matrix-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.07;
+            overflow: hidden;
+        }
+        
+        .container {
+            max-width: 700px;
+            width: 100%;
+            z-index: 1;
+        }
+        
+        .profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--accent-color);
+            padding: 3px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            position: relative;
+            background-color: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .avatar-placeholder {
+            font-size: 60px;
+            color: var(--accent-color);
+        }
+        
+        .profile h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .profile h1::after {
+            content: "";
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--accent-color), transparent);
+        }
+        
+        .profile-tag {
+            color: var(--accent-color);
+            font-size: 14px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+        
+        .profile-bio {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            max-width: 600px;
+        }
+        
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+        
+        .link-card {
+            background-color: var(--card-bg);
+            border-radius: 6px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-color);
+            border-left: 3px solid var(--accent-color);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .link-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: var(--accent-color);
+            transition: width 0.3s ease;
+            z-index: 0;
+        }
+        
+        .link-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            background-color: var(--hover-color);
+        }
+        
+        .link-card:hover::before {
+            width: 100%;
+            opacity: 0.1;
+        }
+        
+        .link-icon {
+            margin-right: 15px;
+            font-size: 24px;
+            color: var(--accent-color);
+            z-index: 1;
+            flex-shrink: 0;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .link-title {
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 1;
+        }
+        
+        .link-danger {
+            border-left-color: var(--danger-color);
+        }
+        
+        .link-danger::before {
+            background-color: var(--danger-color);
+        }
+        
+        .link-danger .link-icon {
+            color: var(--danger-color);
+        }
+        
+        .terminal-footer {
+            margin-top: 40px;
+            text-align: center;
+            width: 100%;
+            font-size: 14px;
+            opacity: 0.7;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .terminal-line {
+            display: flex;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .terminal-prompt {
+            color: var(--accent-color);
+            margin-right: 8px;
+        }
+        
+        .terminal-text {
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+            width: fit-content;
+            animation: typing 4s steps(50) infinite;
+        }
+        
+        @keyframes typing {
+            0% { width: 0 }
+            80% { width: 100% }
+            100% { width: 100% }
+        }
+        
+        .glitch-effect {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .glitch-effect::before,
+        .glitch-effect::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+        }
+        
+        .glitch-effect::before {
+            color: var(--danger-color);
+            animation: glitch-effect 2s infinite;
+            animation-delay: 1s;
+        }
+        
+        .glitch-effect::after {
+            color: var(--accent-color);
+            animation: glitch-effect 3s infinite;
+            animation-delay: 1.5s;
+        }
+        
+        @keyframes glitch-effect {
+            0% { opacity: 0; transform: translateX(-2px); }
+            1% { opacity: 0.8; transform: translateX(2px); }
+            2% { opacity: 0; transform: translateX(-2px); }
+            3% { opacity: 0; transform: translateX(0); }
+        }
+        
+        /* Mobile optimization */
+        @media (max-width: 600px) {
+            .profile h1 {
+                font-size: 24px;
+            }
+            
+            .link-card {
+                padding: 14px 16px;
+            }
+            
+            .link-title {
+                font-size: 16px;
+            }
+            
+            .avatar {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .avatar-placeholder {
+                font-size: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="matrix-bg" id="matrix-canvas"></div>
+    
+    <div class="container">
+        <div class="profile">
+            <div class="avatar">
+                <div class="avatar-placeholder">&#128187;</div>
+            </div>
+            <h1 class="glitch-effect" data-text="BlackLineGroup">BlackLineGroup</h1>
+            <div class="profile-tag">@E?</div>
+            <p class="profile-bio">Hack The Ordinary<br>Master The Extraordinary</p>
+        </div>
+        <div class="links">
+            <a href="https://t.me/addlist/YxoxutYlr-U4N2Fl" class="link-card">
+                <div class="link-icon">
+                    <img src="https://img.icons8.com/?size=32&id=5mIvDYZUWDCF&format=png&color=000000" alt="Instagram Icon">
+                </div>
+                <div class="link-title">Telegram (Must Join Here)</div>
+            </a>
+            <a href="https://www.instagram.com/blacklinegroup_?igsh=aXo5eWUyMWg3MzFn&utm_source=qr" class="link-card">
+                <div class="link-icon">
+                    <img src="https://img.icons8.com/?size=32&id=BrU2BBoRXiWq&format=png&color=000000" alt="Instagram Icon">
+                </div>
+                <div class="link-title">Instagram</div>
+            </a>            
+            <a href="https://www.youtube.com/@BlackLineGroup" class="link-card">
+                <div class="link-icon">
+                    <img src="https://img.icons8.com/?size=32&id=19318&format=png&color=000000" alt="Instagram Icon">
+                </div>
+                <div class="link-title">YouTube Channel</div>
+            </a>
+            <a href="https://discord.gg/cGHF4XAebR" class="link-card">
+                <div class="link-icon">
+                    <img src="https://img.icons8.com/?size=32&id=30998&format=png&color=000000" alt="Instagram Icon">
+                </div>
+                <div class="link-title">Discord</div>
+            </a>
+            <a href="https://t.me/BlackLineGroup" class="link-card link-danger">
+                <div class="link-icon">&#9888;</div>
+                <div class="link-title">Private Group</div>
+            </a>
+        </div>
+        
+        <div class="terminal-footer">
+            <div class="terminal-line">
+                <span class="terminal-prompt">$</span>
+                <span class="terminal-text">Connection secure. Encryption enabled.</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-prompt">#</span>
+                <span class="terminal-text">© 2025 BlackLineGroup | All rights reserved</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Matrix background effect
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            document.getElementById('matrix-canvas').appendChild(canvas);
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Matrix characters
+            const matrix = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}";
+            const characters = matrix.split("");
+            
+            const fontSize = 14;
+            const columns = canvas.width / fontSize;
+            
+            // Array to track the y position of each column
+            const drops = [];
+            for (let i = 0; i < columns; i++) {
+                drops[i] = 1;
+            }
+            
+            // Drawing the characters
+            function draw() {
+                // Black with opacity to create fade effect
+                ctx.fillStyle = "rgba(10, 10, 10, 0.05)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = "#00ff8c"; // Matrix green color
+                ctx.font = fontSize + "px monospace";
+                
+                // Loop through drops array
+                for (let i = 0; i < drops.length; i++) {
+                    // Get random character
+                    const text = characters[Math.floor(Math.random() * characters.length)];
+                    
+                    // Draw character
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    // Move to next position
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    
+                    drops[i]++;
+                }
+            }
+            
+            setInterval(draw, 35);
+            
+            // Resize canvas on window resize
+            window.addEventListener('resize', function() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                const newColumns = canvas.width / fontSize;
+                
+                // Reset drops array for new size
+                for (let i = 0; i < newColumns; i++) {
+                    if (!drops[i]) {
+                        drops[i] = 1;
+                    }
+                }
+            });
+        });
+        
+        // Glitch effect on hover for link cards
+        document.querySelectorAll('.link-card').forEach(card => {
+            card.addEventListener('mouseover', function() {
+                setTimeout(() => {
+                    card.querySelector('.link-title').classList.add('glitch-effect');
+                    card.querySelector('.link-title').setAttribute('data-text', card.querySelector('.link-title').textContent);
+                }, 200);
+            });
+            
+            card.addEventListener('mouseout', function() {
+                card.querySelector('.link-title').classList.remove('glitch-effect');
+            });
+        });
+    </script>
+</body>
+</html>
